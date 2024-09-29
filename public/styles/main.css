@@ -1,0 +1,64 @@
+body {
+    padding-top: 60px; /* Height of the navbar */
+}
+
+.navbar {
+    height: 60px;
+    padding: 0 15px;
+    background-color:#31D2F2 !important; /* light blue color */
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+
+.navbar-scrolled {
+    background-color: rgba(119, 119, 119, 0.8) !important; /* reduced opacity */
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.hero-section {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(49, 49, 49, 0.5);
+    transition: background 0.3s;
+}
+
+.hero-section:hover::before {
+    background:#31D2F2;
+}
+
+.hero-section h2 {
+    color: white;
+    position: relative;
+    z-index: 1;
+    font-size: 2.5rem;
+    transition: transform 0.3s;
+}
+
+.hero-section:hover h2 {
+    transform: scale(1.1);
+}
+
+.delete-url {
+    transition: all 0.3s ease;
+}
+
+.delete-url:hover {
+    transform: scale(1.1);
+}
