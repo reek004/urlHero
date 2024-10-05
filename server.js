@@ -1,19 +1,19 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const ShortUrl = require('./models/shortUrl')
+const QRCode = require('qrcode')
 const path = require('path')
+const qrCode = require('./models/qrCode')
 const app = express()
-require('dotenv').config();
 
 
-//dbConnection
+require('dotenv').config()
 
 const mongoURL = process.env.MONGO_DB_URL;
 
 mongoose.connect(mongoURL, {
   useNewUrlParser: true, useUnifiedTopology: true
 })
-
 const db = mongoose.connection;
 
 db.on('connected',()=> {
@@ -28,7 +28,6 @@ db.on('error',(err)=>{
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(express.json())  // Add this line to parse JSON requests
 
 app.get('/', (req, res) => {
   res.render('index', { page: 'home' })
@@ -53,18 +52,40 @@ app.post('/shortUrls', async (req, res) => {
   }
 })
 
-app.delete('/shortUrls/:id', async (req, res) => {
+app.get('/qrgen', (req, res) => {
+  res.render('index', { page: 'qrgen', qrCode: null })
+})
+
+app.post('/qrgen', async (req, res) => {
+  const url = req.body.url
   try {
-    await ShortUrl.findByIdAndDelete(req.params.id)
-    res.sendStatus(200)
+    const qrCode = await QRCode.toDataURL(url)  // Updated to use QRCode from the library
+    res.render('index', { page: 'qrgen', qrCode: qrCode, url: url })
   } catch (error) {
-    console.error('Error deleting URL:', error)
-    res.sendStatus(500)
+    console.error('Error generating QR code:', error)
+    res.render('index', { page: 'qrgen', qrCode: null, error: 'Failed to generate QR code' })
   }
 })
 
-app.get('/qrgen', (req, res) => {
-  res.render('index', { page: 'qrgen' })
+app.get('/qrgen/download', (req, res) => {
+  const url = req.query.url
+  QRCode.toFile('qrcode.png', url, (err) => {
+    if (err) {
+      res.status(500).send('Error generating QR code')
+    } else {
+      res.download('qrcode.png')
+    }
+  })
+})
+
+app.post('/deleteUrl', async (req, res) => {
+  try {
+    await ShortUrl.findByIdAndDelete(req.body.id)
+    res.redirect('/shortUrls')
+  } catch (error) {
+    console.error('Error deleting URL:', error)
+    res.status(500).send('Error deleting URL')
+  }
 })
 
 app.get('/:shortUrl', async (req, res) => {
